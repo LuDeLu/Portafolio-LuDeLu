@@ -1,7 +1,9 @@
 "use client";
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
-import { useLenis } from "@/lib/lenis";
+import { createPortal } from "react-dom";
+import { useScrollLock } from "@/hooks/use-scroll-lock";
+import { useFocusTrap } from "@/hooks/use-focus-trap";
 import React, {
   ReactNode,
   createContext,
@@ -58,19 +60,6 @@ export const ModalTrigger = ({
   );
 };
 
-const LenisController = ({ open }: { open: boolean }) => {
-  const lenis = useLenis(() => { });
-  useEffect(() => {
-    if (!lenis) return;
-    if (open) {
-      lenis.stop();
-    } else {
-      lenis.start();
-    }
-  }, [open, lenis]);
-  return null;
-};
-
 export const ModalBody = ({
   children,
   className,
@@ -79,11 +68,13 @@ export const ModalBody = ({
   className?: string;
 }) => {
   const { open, setOpen } = useModal();
+  const panelRef = useRef<HTMLDivElement>(null);
+  const [mounted, setMounted] = useState(false);
 
-  useEffect(() => {
-    document.body.style.overflow = open ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
-  }, [open]);
+  useEffect(() => setMounted(true), []);
+
+  useScrollLock(open);
+  useFocusTrap(open, panelRef);
 
   useEffect(() => {
     if (!open) return;
@@ -92,41 +83,45 @@ export const ModalBody = ({
     return () => document.removeEventListener("keydown", onKey);
   }, [open, setOpen]);
 
-  return (
-    <>
-      <LenisController open={open} />
-      <AnimatePresence>
-        {open && (
-          <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80"
-            aria-modal="true"
-            role="dialog"
-            onClick={() => setOpen(false)}
+  if (!mounted) return null;
+
+  // Portalled to the body: ancestors animate `transform`/`opacity`, which would
+  // otherwise make this the containing block for `position: fixed`.
+  return createPortal(
+    <AnimatePresence>
+      {open && (
+        <div
+          className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/80"
+          aria-modal="true"
+          role="dialog"
+          onClick={() => setOpen(false)}
+        >
+          <motion.div
+            ref={panelRef}
+            tabIndex={-1}
+            className={cn(
+              "relative w-full mx-4 sm:mx-0 sm:w-[90vw] md:w-[80vw] max-w-5xl",
+              "max-h-[90dvh] flex flex-col outline-none",
+              "bg-background border border-border/60 rounded-2xl shadow-2xl shadow-black/60",
+              "overflow-hidden",
+              className
+            )}
+            style={{ translateZ: 0 }}
+            initial={{ opacity: 0, scale: 0.96 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.97 }}
+            transition={{ duration: 0.18, ease: "easeOut" }}
+            onClick={(e) => e.stopPropagation()}
           >
-            <motion.div
-              className={cn(
-                "relative w-full mx-4 sm:mx-0 sm:w-[90vw] md:w-[80vw] max-w-5xl",
-                "max-h-[90dvh] flex flex-col",
-                "bg-background border border-border/60 rounded-2xl shadow-2xl shadow-black/60",
-                "overflow-hidden",
-                className
-              )}
-              style={{ translateZ: 0 }}
-              initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.97 }}
-              transition={{ duration: 0.18, ease: "easeOut" }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <CloseIcon />
-              <div className="flex-1 overflow-y-auto overscroll-contain">
-                {children}
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-    </>
+            <CloseIcon />
+            <div className="flex-1 overflow-y-auto overscroll-contain">
+              {children}
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>,
+    document.body
   );
 };
 

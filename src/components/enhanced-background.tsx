@@ -1,10 +1,17 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTheme } from "next-themes";
 
 export default function EnhancedBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const { theme } = useTheme();
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
+
+  // next-themes reports no theme during SSR and the first client render, so
+  // reading it directly makes the gradient hydrate with the wrong colours.
+  const theme = mounted ? resolvedTheme : "dark";
 
   useEffect(() => {
     const canvas = canvasRef.current;

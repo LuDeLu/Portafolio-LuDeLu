@@ -10,6 +10,7 @@ import { Menu, X } from "lucide-react";
 import { config } from "@/data/config";
 import Link from "next/link";
 import { useLenis } from "@/lib/lenis";
+import { useScrollLock } from "@/hooks/use-scroll-lock";
 
 interface FuturisticHeaderProps {
   loader?: boolean;
@@ -25,19 +26,32 @@ const FuturisticHeader = ({ loader }: FuturisticHeaderProps) => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 50);
     };
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  useScrollLock(isActive);
+
+  useEffect(() => {
+    if (!isActive) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setIsActive(false); };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [isActive]);
 
   const handleSmoothScroll = useCallback(
     (e: React.MouseEvent<HTMLAnchorElement>, targetId: string) => {
       e.preventDefault();
-      if (lenis) {
-        lenis.scrollTo(`#${targetId}`, { duration: 1.6, easing: (t) => 1 - Math.pow(1 - t, 4) });
-      } else {
-        document.getElementById(targetId)?.scrollIntoView({ behavior: "smooth" });
-      }
       setIsActive(false);
+      // Deferred a frame: closing the menu releases the scroll lock, and Lenis
+      // ignores scrollTo while it is stopped.
+      requestAnimationFrame(() => {
+        if (lenis) {
+          lenis.scrollTo(`#${targetId}`, { duration: 1.6, easing: (t) => 1 - Math.pow(1 - t, 4) });
+        } else {
+          document.getElementById(targetId)?.scrollIntoView({ behavior: "smooth" });
+        }
+      });
     },
     [lenis]
   );
@@ -156,6 +170,11 @@ const FuturisticHeader = ({ loader }: FuturisticHeaderProps) => {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 30, stiffness: 300 }}
+              // This panel covers the backdrop, so tapping anywhere that isn't a
+              // link has to dismiss the menu itself.
+              onClick={(e) => {
+                if (!(e.target as HTMLElement).closest("a")) setIsActive(false);
+              }}
             >
               <div className="p-8 flex flex-col gap-3">
                 {navLinks.map((link, index) => (

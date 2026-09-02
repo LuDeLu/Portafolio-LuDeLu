@@ -13,6 +13,7 @@ import {
   SiMongodb,
   SiPostgresql,
   SiMysql,
+  SiAstro,
 } from "react-icons/si";
 
 export const ProjectsLinks = ({ live, repo, visitLabel }: { live: string; repo?: string; visitLabel?: string }) => {
@@ -126,6 +127,12 @@ const PROJECT_SKILLS = {
     fg: "white",
     icon: <SiMysql />,
   },
+  astro: {
+    title: "Astro",
+    bg: "black",
+    fg: "white",
+    icon: <SiAstro />,
+  },
 };
 
 export type Project = {
@@ -153,6 +160,30 @@ const lucasProjects: Project[] = [
       backend: [PROJECT_SKILLS.node],
     },
     live: "http://orionmkt.com.ar/",
+  },
+  {
+    id: "grupo866",
+    categoryKey: "website",
+    title: "Grupo 8.66",
+    src: "/proyectos/grupo866.png",
+    screenshots: [],
+    skills: {
+      frontend: [PROJECT_SKILLS.react, PROJECT_SKILLS.next, PROJECT_SKILLS.tailwind],
+      backend: [PROJECT_SKILLS.node],
+    },
+    live: "https://grupo866.orionmkt.com.ar/",
+  },
+  {
+    id: "schepens",
+    categoryKey: "website",
+    title: "Schepens",
+    src: "/proyectos/schepens.png",
+    screenshots: [],
+    skills: {
+      frontend: [PROJECT_SKILLS.astro, PROJECT_SKILLS.ts, PROJECT_SKILLS.tailwind],
+      backend: [PROJECT_SKILLS.node],
+    },
+    live: "https://www.schepens.com.ar/",
   },
   {
     id: "rrsintetico",

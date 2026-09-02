@@ -118,6 +118,14 @@ export const translations = {
           category: 'Página web',
           description: 'Sitio web moderno desarrollado con React, Tailwind y Node.js para agencia de marketing.',
         },
+        grupo866: {
+          category: 'Página web',
+          description: 'Sitio web para desarrolladora inmobiliaria, con catálogo de proyectos, líneas y fichas de cada emprendimiento.',
+        },
+        schepens: {
+          category: 'Página web',
+          description: 'Sitio web multiidioma para fabricante de equipamiento de panadería, con catálogo de productos y secciones de servicios.',
+        },
         rrsintetico: {
           category: 'Aplicación web',
           description: 'Aplicación web completa para empresa de sintético deportivo con sistema de cotizaciones y gestión de proyectos.',
@@ -318,6 +326,14 @@ export const translations = {
         orionmkt: {
           category: 'Website',
           description: 'Modern website developed with React, Tailwind, and Node.js for a marketing agency.',
+        },
+        grupo866: {
+          category: 'Website',
+          description: 'Website for a real estate developer, featuring a project catalog, product lines, and detail pages for each development.',
+        },
+        schepens: {
+          category: 'Website',
+          description: 'Multilingual website for a bakery equipment manufacturer, with a product catalog and services sections.',
         },
         rrsintetico: {
           category: 'Web Application',

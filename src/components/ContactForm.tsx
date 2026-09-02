@@ -7,7 +7,6 @@ import { Textarea } from "./ui/ace-textarea";
 import { cn } from "@/lib/utils";
 import { useToast } from "./ui/use-toast";
 import { Button } from "./ui/button";
-import { useRouter } from "next/navigation";
 import { useLanguage } from "@/contexts/language";
 
 const ContactForm = () => {
@@ -18,7 +17,6 @@ const ContactForm = () => {
   const [loading, setLoading] = React.useState(false);
 
   const { toast } = useToast();
-  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -33,26 +31,29 @@ const ContactForm = () => {
           fullName,
           email,
           message,
+          language,
         }),
       });
-      const data = await res.json();
-      if (data.error) throw new Error(data.error);
+      const data = await res.json().catch(() => ({}));
+      // A status check is the only reliable signal that the mail went out.
+      if (!res.ok || data.error) {
+        throw new Error(data.error || "Request failed");
+      }
       toast({
         title: language === 'es' ? "¡Gracias!" : "Thank you!",
-        description: language === 'es'
-          ? "Te responderé lo antes posible."
-          : "I'll get back to you as soon as possible.",
+        description: data.confirmationSent
+          ? (language === 'es'
+            ? "Te mandé un mail de confirmación. Te respondo lo antes posible."
+            : "I sent you a confirmation email. I'll get back to you as soon as possible.")
+          : (language === 'es'
+            ? "Te responderé lo antes posible."
+            : "I'll get back to you as soon as possible."),
         variant: "default",
         className: cn("top-0 mx-auto flex fixed md:top-4 md:right-4"),
       });
-      setLoading(false);
       setFullName("");
       setEmail("");
       setMessage("");
-      const timer = setTimeout(() => {
-        router.push("/");
-        clearTimeout(timer);
-      }, 1000);
     } catch (err) {
       toast({
         title: "Error",

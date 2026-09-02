@@ -15,15 +15,29 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const [language, setLanguageState] = useState<Language>('es');
 
   useEffect(() => {
-    const saved = localStorage.getItem('language') as Language;
-    if (saved && (saved === 'es' || saved === 'en')) {
-      setLanguageState(saved);
+    try {
+      const saved = localStorage.getItem('language') as Language;
+      if (saved === 'es' || saved === 'en') {
+        setLanguageState(saved);
+      }
+    } catch {
+      // localStorage can throw in private mode — fall back to the default.
     }
   }, []);
 
+  // Keep <html lang> in sync so screen readers and search engines pick up the
+  // switch; the attribute in layout.tsx is only the server-rendered default.
+  useEffect(() => {
+    document.documentElement.lang = language;
+  }, [language]);
+
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
-    localStorage.setItem('language', lang);
+    try {
+      localStorage.setItem('language', lang);
+    } catch {
+      // Ignore: the choice just won't persist across reloads.
+    }
   };
 
   const t = translations[language];

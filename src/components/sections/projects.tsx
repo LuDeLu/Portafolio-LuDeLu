@@ -1,6 +1,9 @@
 "use client";
 import Image from "next/image";
 import React, { useState, useMemo, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
+import { useScrollLock } from "@/hooks/use-scroll-lock";
+import { useFocusTrap } from "@/hooks/use-focus-trap";
 import {
   Modal,
   ModalBody,
@@ -120,15 +123,16 @@ const MobileProjectModal = ({
 }) => {
   const { t } = useLanguage();
   const scrollRef = useRef<HTMLDivElement>(null);
+  const sheetRef = useRef<HTMLDivElement>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
+
+  useScrollLock(open);
+  useFocusTrap(open, sheetRef);
 
   useEffect(() => {
-    if (open) {
-      document.body.style.overflow = "hidden";
-      scrollRef.current?.scrollTo({ top: 0 });
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => { document.body.style.overflow = ""; };
+    if (open) scrollRef.current?.scrollTo({ top: 0 });
   }, [open]);
 
   useEffect(() => {
@@ -143,7 +147,11 @@ const MobileProjectModal = ({
   const categoryLabel = projectData?.category || project.categoryKey;
   const description = projectData?.description;
 
-  return (
+  if (!mounted) return null;
+
+  // Portalled to the body: `SectionWrapper` animates a transform on an ancestor,
+  // which would otherwise anchor these `fixed` layers to the section.
+  return createPortal(
     <AnimatePresence>
       {open && (
         <>
@@ -153,17 +161,22 @@ const MobileProjectModal = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.22 }}
-            className="fixed inset-0 z-[60] bg-black/75 backdrop-blur-md"
+            className="fixed inset-0 z-[1100] bg-black/75 backdrop-blur-md"
             onClick={onClose}
           />
 
           <motion.div
             key="sheet"
+            ref={sheetRef}
+            tabIndex={-1}
+            role="dialog"
+            aria-modal="true"
+            aria-label={project.title}
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
             transition={{ type: "spring", stiffness: 340, damping: 36, mass: 0.9 }}
-            className="fixed z-[70] bottom-0 left-0 right-0 flex flex-col bg-card rounded-t-3xl max-h-[94dvh] shadow-2xl"
+            className="fixed z-[1110] bottom-0 left-0 right-0 flex flex-col bg-card rounded-t-3xl max-h-[94dvh] shadow-2xl outline-none"
           >
             <div className="flex justify-center pt-3 pb-1 flex-shrink-0">
               <div className="w-9 h-[3px] rounded-full bg-border/50" />
@@ -300,7 +313,8 @@ const MobileProjectModal = ({
           </motion.div>
         </>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 };
 
