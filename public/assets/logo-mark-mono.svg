@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="LuDeLu">
+  <title>LuDeLu</title>
+  <path d="M4,4 h12 v22 h14 v12 H4 Z" fill="currentColor"/>
+  <path d="M60,60 h-12 v-22 h-14 v-12 H60 Z" fill="currentColor"/>
+</svg>

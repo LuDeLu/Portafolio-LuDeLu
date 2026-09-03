@@ -14,12 +14,27 @@ const TO_EMAIL = process.env.CONTACT_TO_EMAIL || "lucas@orionmkt.com.ar";
 const FROM_EMAIL =
   process.env.CONTACT_FROM_EMAIL || "Portafolio LuDeLu <no-reply@orionmkt.com.ar>";
 
+// Route files may only export handlers, so these stay local — the client
+// mirrors them in src/components/ContactForm.tsx.
+const MIN_NAME = 2;
+const MIN_MESSAGE = 10;
+
 const Email = z.object({
-  fullName: z.string().trim().min(2, "Full name is invalid!"),
-  email: z.string().trim().email({ message: "Email is invalid!" }),
-  message: z.string().trim().min(10, "Message is too short!"),
+  fullName: z.string().trim().min(MIN_NAME),
+  email: z.string().trim().email(),
+  message: z.string().trim().min(MIN_MESSAGE),
   language: z.enum(["es", "en"]).default("es"),
 });
+
+/**
+ * The client renders the message, so the API answers with a stable code per
+ * field instead of an English sentence the visitor would never understand.
+ */
+const FIELD_CODES: Record<string, string> = {
+  fullName: "invalid_name",
+  email: "invalid_email",
+  message: "short_message",
+};
 
 export async function POST(req: Request) {
   try {
@@ -27,8 +42,11 @@ export async function POST(req: Request) {
     const parsed = Email.safeParse(body);
 
     if (!parsed.success) {
+      const fields = parsed.error.issues.map(
+        (i) => FIELD_CODES[String(i.path[0])] ?? "invalid_request"
+      );
       return Response.json(
-        { error: parsed.error.issues.map((i) => i.message).join(" ") },
+        { error: "validation", code: fields[0], fields },
         { status: 400 }
       );
     }

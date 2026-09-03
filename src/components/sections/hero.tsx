@@ -206,7 +206,14 @@ const HeroSection = () => {
                   {t.hero.hireMe}
                 </Button>
 
-                <Link href="/cv/Lucas_Baez-CV.pdf" target="_blank">
+                {/* A plain anchor on purpose: next/link prefetches the href as
+                    an RSC payload, and "/cv/…pdf?_rsc=…" 404s on the edge. */}
+                <a
+                  href="/cv/Lucas_Baez-CV.pdf"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  download
+                >
                   <Button
                     variant="ghost"
                     size="default"
@@ -215,7 +222,7 @@ const HeroSection = () => {
                     <File size={13} />
                     CV
                   </Button>
-                </Link>
+                </a>
               </motion.div>
 
               <motion.div

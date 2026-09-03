@@ -11,6 +11,7 @@ import { config } from "@/data/config";
 import Link from "next/link";
 import { useLenis } from "@/lib/lenis";
 import { useScrollLock } from "@/hooks/use-scroll-lock";
+import { LuDeLuLockup } from "../logos/ludelu";
 
 interface FuturisticHeaderProps {
   loader?: boolean;
@@ -87,8 +88,12 @@ const FuturisticHeader = ({ loader }: FuturisticHeaderProps) => {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: loader ? 3.5 : 0.1 }}
             >
-              <Link href="/" className="font-display font-bold text-sm md:text-base tracking-tight hover:text-primary transition-colors">
-                LuDeLu
+              <Link
+                href="/"
+                aria-label="LuDeLu — inicio"
+                className="inline-flex opacity-90 hover:opacity-100 transition-opacity"
+              >
+                <LuDeLuLockup />
               </Link>
             </motion.div>
 

@@ -204,6 +204,15 @@ export const translations = {
       message: 'Mensaje',
       send: 'Enviar Mensaje',
       sending: 'Enviando...',
+      minMessage: 'Contame un poco más, al menos 10 caracteres.',
+      errors: {
+        invalid_name: 'Escribí tu nombre completo (al menos 2 caracteres).',
+        invalid_email: 'Revisá el correo, no parece válido.',
+        short_message: 'El mensaje es muy corto. Contame un poco más, al menos 10 caracteres.',
+        invalid_request: 'Faltan datos en el formulario.',
+        delivery: 'No pude enviar el mensaje. Probá de nuevo en un momento.',
+        generic: '¡Algo salió mal! Por favor revisá los campos.',
+      },
     },
     footer: {
       rights: 'Todos los derechos reservados',
@@ -413,6 +422,15 @@ export const translations = {
       message: 'Message',
       send: 'Send Message',
       sending: 'Sending...',
+      minMessage: 'Tell me a bit more — at least 10 characters.',
+      errors: {
+        invalid_name: 'Please enter your full name (at least 2 characters).',
+        invalid_email: 'That email address does not look valid.',
+        short_message: 'That message is too short. Tell me a bit more — at least 10 characters.',
+        invalid_request: 'Some fields are missing.',
+        delivery: 'I could not send the message. Please try again in a moment.',
+        generic: 'Something went wrong! Please check the fields.',
+      },
     },
     footer: {
       rights: 'All rights reserved',

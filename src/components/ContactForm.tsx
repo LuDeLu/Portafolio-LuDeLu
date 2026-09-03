@@ -9,14 +9,34 @@ import { useToast } from "./ui/use-toast";
 import { Button } from "./ui/button";
 import { useLanguage } from "@/contexts/language";
 
+/** Kept in sync with the zod schema in src/app/api/send/route.ts. */
+const MIN_NAME = 2;
+const MIN_MESSAGE = 10;
+
+const FIELD_FOR_CODE: Record<string, string> = {
+  invalid_name: "fullname",
+  invalid_email: "email",
+  short_message: "content",
+};
+
+/** Marks an error whose message is already localised and safe to show. */
+class FormError extends Error {}
+
 const ContactForm = () => {
   const { t, language } = useLanguage();
   const [fullName, setFullName] = React.useState("");
   const [email, setEmail] = React.useState("");
   const [message, setMessage] = React.useState("");
   const [loading, setLoading] = React.useState(false);
+  const [fieldError, setFieldError] = React.useState<string | null>(null);
 
   const { toast } = useToast();
+
+  // Move the caret to whichever field the API rejected.
+  React.useEffect(() => {
+    if (!fieldError) return;
+    document.getElementById(fieldError)?.focus();
+  }, [fieldError]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -37,8 +57,14 @@ const ContactForm = () => {
       const data = await res.json().catch(() => ({}));
       // A status check is the only reliable signal that the mail went out.
       if (!res.ok || data.error) {
-        throw new Error(data.error || "Request failed");
+        // 400 carries a field code the API defined; anything else is delivery.
+        const key: string =
+          res.status === 400 ? data.code ?? "invalid_request" : "delivery";
+        const errors = t.contact.errors as Record<string, string>;
+        setFieldError(FIELD_FOR_CODE[key] ?? null);
+        throw new FormError(errors[key] ?? errors.generic);
       }
+      setFieldError(null);
       toast({
         title: language === 'es' ? "¡Gracias!" : "Thank you!",
         description: data.confirmationSent
@@ -57,9 +83,8 @@ const ContactForm = () => {
     } catch (err) {
       toast({
         title: "Error",
-        description: language === 'es'
-          ? "¡Algo salió mal! Por favor revisa los campos."
-          : "Something went wrong! Please check the fields.",
+        description:
+          err instanceof FormError ? err.message : t.contact.errors.generic,
         className: cn(
           "top-0 w-full flex justify-center fixed md:max-w-7xl md:top-4 md:right-4"
         ),
@@ -78,6 +103,9 @@ const ContactForm = () => {
             placeholder={language === 'es' ? 'Tu nombre' : 'Your Name'}
             type="text"
             required
+            minLength={MIN_NAME}
+            autoComplete="name"
+            aria-invalid={fieldError === "fullname"}
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
           />
@@ -89,6 +117,8 @@ const ContactForm = () => {
             placeholder={language === 'es' ? 'tu@ejemplo.com' : 'you@example.com'}
             type="email"
             required
+            autoComplete="email"
+            aria-invalid={fieldError === "email"}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
@@ -102,14 +132,30 @@ const ContactForm = () => {
             : 'Tell me about your project...'}
           id="content"
           required
+          minLength={MIN_MESSAGE}
+          aria-invalid={fieldError === "content"}
           value={message}
           onChange={(e) => setMessage(e.target.value)}
         />
-        <p className="text-sm text-muted-foreground">
-          {language === 'es'
-            ? 'Nunca compartiré tus datos con nadie más. ¡Lo prometo!'
-            : "I'll never share your data with anyone else. Pinky promise!"}
-        </p>
+        <div className="flex items-start justify-between gap-3">
+          <p className="text-sm text-muted-foreground">
+            {message.trim().length > 0 && message.trim().length < MIN_MESSAGE
+              ? t.contact.minMessage
+              : language === 'es'
+                ? 'Nunca compartiré tus datos con nadie más. ¡Lo prometo!'
+                : "I'll never share your data with anyone else. Pinky promise!"}
+          </p>
+          <span
+            className={cn(
+              "text-xs font-mono tabular-nums flex-shrink-0 pt-0.5",
+              message.trim().length > 0 && message.trim().length < MIN_MESSAGE
+                ? "text-destructive"
+                : "text-muted-foreground/50"
+            )}
+          >
+            {message.trim().length}/{MIN_MESSAGE}
+          </span>
+        </div>
       </div>
       <Button
         disabled={loading}
