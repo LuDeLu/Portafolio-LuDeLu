@@ -291,7 +291,7 @@ const lucasProjects: Project[] = [
       frontend: [PROJECT_SKILLS.next, PROJECT_SKILLS.tailwind],
       backend: [],
     },
-    live: "https://www.monacocortinas.com.ar/",
+    live: "https://monaco.orionmkt.com.ar/",
   },
   {
     id: "monacoseg",
