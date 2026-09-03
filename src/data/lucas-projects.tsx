@@ -186,6 +186,18 @@ const lucasProjects: Project[] = [
     live: "https://www.schepens.com.ar/",
   },
   {
+    id: "monacocor",
+    categoryKey: "website",
+    title: "Monaco Cortinas",
+    src: "/proyectos/monacocor.png",
+    screenshots: [],
+    skills: {
+      frontend: [PROJECT_SKILLS.next, PROJECT_SKILLS.tailwind],
+      backend: [],
+    },
+    live: "https://monaco.orionmkt.com.ar/",
+  },
+  {
     id: "rrsintetico",
     categoryKey: "webapp",
     title: "RR Sintético",
@@ -280,18 +292,6 @@ const lucasProjects: Project[] = [
       backend: [],
     },
     live: "https://www.fundaciontierrasabia.org.ar/",
-  },
-  {
-    id: "monacocor",
-    categoryKey: "website",
-    title: "Monaco Cortinas",
-    src: "/proyectos/monacocor.png",
-    screenshots: [],
-    skills: {
-      frontend: [PROJECT_SKILLS.next, PROJECT_SKILLS.tailwind],
-      backend: [],
-    },
-    live: "https://monaco.orionmkt.com.ar/",
   },
   {
     id: "monacoseg",
